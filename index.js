@@ -126,7 +126,17 @@ Web3ProviderEngine.prototype._handleAsync = function(payload, finished) {
       if (fn) {
         fn(error, result, callback)
       } else {
-        callback()
+        try {
+          // it really throws...
+          callback(error);
+        } catch (e) {
+          if (e.message === 'Callback was already called.') {
+            // it will also make promise 'pending' forever
+            console.error('"Callback was already called" anomaly', e);
+            throw error || e;
+          }
+          throw e;
+        }
       }
     }, function() {
       // console.log('COMPLETED:', payload)
